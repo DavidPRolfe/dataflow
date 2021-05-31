@@ -183,15 +183,6 @@ pub enum Source {
     Literal(DataType),
 }
 
-impl Source {
-    pub fn to_datatype(&self) -> DataType {
-        match self {
-            Source::Column(c) => DataType::Integer(*c as i32), // TODO: Make usize datatype for column storage
-            Source::Literal(d) => d.clone()
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

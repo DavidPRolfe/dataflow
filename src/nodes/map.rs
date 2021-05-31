@@ -8,7 +8,7 @@ struct Map {
 }
 
 impl Updater for Map {
-    fn process(&mut self, mut updates: RowUpdates) -> RowUpdates {
+    fn process(&mut self, updates: RowUpdates) -> RowUpdates {
         updates
             .updates
             .iter()

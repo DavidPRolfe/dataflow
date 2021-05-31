@@ -5,8 +5,8 @@ use crate::nodes::state::State;
 /// Count is used to get the non-distinct count of rows with non null values passing through it.
 /// It can be optionally be grouped by any number of columns.
 ///
-/// TODO: Make this work for distinct values. Should only need to add another field to the stored group
-/// during processing?
+/// Note this doesn't directly support Count(*) from SQL. Instead this must be translated
+/// to Count(1) before it gets to this node.
 struct Count<S: State> {
     source: Source,
     group: Vec<usize>,
@@ -33,6 +33,7 @@ impl<S: State> Count<S> {
 }
 
 impl<S: State> Updater for Count<S> {
+    // TODO: Group updates and don't send out update if addition/removal cancel out
     fn process(&mut self, mut updates: RowUpdates) -> RowUpdates {
         for mut update in updates.updates.iter_mut() {
             let mut group = vec![];
@@ -60,16 +61,143 @@ impl<S: State> Updater for Count<S> {
     }
 }
 
-struct CountState {
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::nodes::state::MemStore;
 
+    #[test]
+    fn counts_literals() {
+        let mut node = Count {
+            source: Source::Literal(DataType::Integer(1)),
+            group: vec![],
+            state: MemStore::new(),
+        };
+        let updates = vec![
+            RowUpdate::Add(vec![0.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Add(vec![1.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Remove(vec![0.into(), "hello".into(), DataType::None].into()),
+        ];
+
+        let processed = node.process(updates.into());
+        assert_eq!(processed.updates.len(), 3);
+        assert_eq!(processed.updates[0][3], 1.into());
+        assert_eq!(processed.updates[1][3], 2.into());
+        assert_eq!(processed.updates[2][3], 1.into());
+
+        // Checking it works with non-1 literal
+        let mut node = Count {
+            source: Source::Literal(DataType::Integer(2)),
+            group: vec![],
+            state: MemStore::new(),
+        };
+
+        let updates = vec![
+            RowUpdate::Add(vec![0.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Add(vec![1.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Remove(vec![0.into(), "hello".into(), DataType::None].into()),
+        ];
+
+        let processed = node.process(updates.into());
+        assert_eq!(processed.updates.len(), 3);
+        assert_eq!(processed.updates[0][3], 1.into());
+        assert_eq!(processed.updates[1][3], 2.into());
+        assert_eq!(processed.updates[2][3], 1.into());
+    }
+
+    #[test]
+    fn counts_null_literal() {
+        let mut node = Count {
+            source: Source::Literal(DataType::None),
+            group: vec![],
+            state: MemStore::new(),
+        };
+        let updates = vec![
+            RowUpdate::Add(vec![0.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Add(vec![1.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Remove(vec![0.into(), "hello".into(), DataType::None].into()),
+        ];
+
+        let processed = node.process(updates.into());
+        assert_eq!(processed.updates.len(), 3);
+        assert_eq!(processed.updates[0][3], 0.into());
+        assert_eq!(processed.updates[1][3], 0.into());
+        assert_eq!(processed.updates[2][3], 0.into());
+    }
+
+    #[test]
+    fn counts_columns() {
+        let mut node = Count {
+            source: Source::Column(0),
+            group: vec![],
+            state: MemStore::new(),
+        };
+        let updates = vec![
+            RowUpdate::Add(vec![0.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Add(vec![1.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Remove(vec![0.into(), "hello".into(), DataType::None].into()),
+        ];
+
+        let processed = node.process(updates.into());
+        assert_eq!(processed.updates.len(), 3);
+        assert_eq!(processed.updates[0][3], 1.into());
+        assert_eq!(processed.updates[1][3], 2.into());
+        assert_eq!(processed.updates[2][3], 1.into());
+
+        let mut node = Count {
+            source: Source::Column(2),
+            group: vec![],
+            state: MemStore::new(),
+        };
+
+        let updates = vec![
+            RowUpdate::Add(vec![0.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Add(vec![1.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Remove(vec![0.into(), "hello".into(), DataType::None].into()),
+        ];
+
+        let processed = node.process(updates.into());
+        assert_eq!(processed.updates.len(), 3);
+        assert_eq!(processed.updates[0][3], 0.into());
+        assert_eq!(processed.updates[1][3], 0.into());
+        assert_eq!(processed.updates[2][3], 0.into());
+    }
+
+    #[test]
+    fn groups_by_correctly() {
+        let mut node = Count {
+            source: Source::Column(0),
+            group: vec![0],
+            state: MemStore::new(),
+        };
+        let updates = vec![
+            RowUpdate::Add(vec![0.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Add(vec![1.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Remove(vec![0.into(), "hello".into(), DataType::None].into()),
+        ];
+
+        let processed = node.process(updates.into());
+        assert_eq!(processed.updates.len(), 3);
+        assert_eq!(processed.updates[0][3], 1.into());
+        assert_eq!(processed.updates[1][3], 1.into());
+        assert_eq!(processed.updates[2][3], 0.into());
+
+        let mut node = Count {
+            source: Source::Column(2),
+            group: vec![0],
+            state: MemStore::new(),
+        };
+
+        let updates = vec![
+            RowUpdate::Add(vec![0.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Add(vec![1.into(), "hello".into(), DataType::None].into()),
+            RowUpdate::Remove(vec![0.into(), "hello".into(), DataType::None].into()),
+        ];
+
+        let processed = node.process(updates.into());
+        assert_eq!(processed.updates.len(), 3);
+        assert_eq!(processed.updates[0][3], 0.into());
+        assert_eq!(processed.updates[1][3], 0.into());
+        assert_eq!(processed.updates[2][3], 0.into());
+    }
 }
-
-// What things are we counting
-// This can be a literal value, a value from a column, or a row count, ex: Count(*)
-// Row count is identical to count(1) which makes count equal in source to other aggregation functions
-// Thus we should translate all count(*) to count(1) before this point.
-
-// If its not in a group its erased, unless there is no group in which case all go through
-// Aggregations must also be projections. Where they differ is what you do with the dropped values.
-// Projection is the special case of doing nothing. Though may be better to have that be its own node
-// as it doesn't require state.
