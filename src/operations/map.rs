@@ -1,13 +1,13 @@
-use crate::nodes::data::{DataType, RowUpdate, RowUpdates, Source};
-use crate::nodes::Updater;
+use super::data::{DataType, RowUpdate, RowUpdates, Source};
+use super::Operation;
 
-/// Map node will alter all incoming rows to match the sources. This may reorder columns, add new
+/// Map will alter all incoming rows to match the sources. This may reorder columns, add new
 /// copies of columns, or add new columns of literals
-struct Map {
+pub struct Map {
     sources: Vec<Source>,
 }
 
-impl Updater for Map {
+impl Operation for Map {
     fn process(&mut self, updates: RowUpdates) -> RowUpdates {
         updates
             .updates

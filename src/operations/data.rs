@@ -1,6 +1,6 @@
+use ordered_float::OrderedFloat;
 use std::ops::{Index, IndexMut};
 use std::slice::SliceIndex;
-use ordered_float::OrderedFloat;
 
 /// DataType exists to make code generic over the supported data types
 ///
@@ -13,36 +13,6 @@ pub enum DataType {
     Boolean(bool),
     Float(OrderedFloat<f32>),
 }
-//
-// impl PartialEq for DataType {
-//     fn eq(&self, other: &Self) -> bool {
-//         use DataType::*;
-//
-//         match (self, other) {
-//             (None, None) => true,
-//             (Integer(a), Integer(b)) => a == b,
-//             (Text(a), Text(b)) => a == b,
-//             (Boolean(a), Boolean(b)) => a == b,
-//             (Float(a), Float(b)) => a == b,
-//             _ => false,
-//         }
-//     }
-// }
-//
-// impl PartialOrd for DataType {
-//     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-//         use DataType::*;
-//
-//         match (self, other) {
-//             (None, None) => Some(Equal),
-//             (Integer(a), Integer(b)) => Some(a.cmp(b)),
-//             (Text(a), Text(b)) => Some(a.cmp(b)),
-//             (Boolean(a), Boolean(b)) => Some(a.cmp(b)),
-//             (Float(a), Float(b)) => a.partial_cmp(b),
-//             _ => Option::None,
-//         }
-//     }
-// }
 
 impl From<i32> for DataType {
     fn from(n: i32) -> Self {

@@ -1,8 +1,8 @@
-use crate::nodes::data::{Column, Comparison, DataType, RowUpdates};
-use crate::nodes::Updater;
+use super::data::{Column, Comparison, DataType, RowUpdates};
+use super::Operation;
 
-/// Filter node will remove all rows that don't meet all of the constraint
-struct Filter {
+/// Filter will remove all rows that don't meet all of the constraint
+pub struct Filter {
     constraints: Vec<ColumnConstraint>,
 }
 
@@ -16,7 +16,7 @@ enum Constraint {
     In(Vec<DataType>),
 }
 
-impl Updater for Filter {
+impl Operation for Filter {
     fn process(&mut self, mut updates: RowUpdates) -> RowUpdates {
         updates.updates.retain(|update| {
             self.constraints
@@ -36,7 +36,7 @@ impl Updater for Filter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::nodes::data::RowUpdate;
+    use crate::operations::data::RowUpdate;
 
     #[test]
     fn filters_nothing() {

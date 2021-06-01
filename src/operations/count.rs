@@ -1,13 +1,13 @@
-use crate::nodes::data::{DataType, RowUpdate, RowUpdates, Source};
-use crate::nodes::Updater;
-use crate::nodes::state::State;
+use super::data::{DataType, RowUpdate, RowUpdates, Source};
+use super::state::State;
+use super::Operation;
 
 /// Count is used to get the non-distinct count of rows with non null values passing through it.
 /// It can be optionally be grouped by any number of columns.
 ///
 /// Note this doesn't directly support Count(*) from SQL. Instead this must be translated
 /// to Count(1) before it gets to this node.
-struct Count<S: State> {
+pub struct Count<S: State> {
     source: Source,
     group: Vec<usize>,
     state: S,
@@ -32,7 +32,7 @@ impl<S: State> Count<S> {
     }
 }
 
-impl<S: State> Updater for Count<S> {
+impl<S: State> Operation for Count<S> {
     // TODO: Group updates and don't send out update if addition/removal cancel out
     fn process(&mut self, mut updates: RowUpdates) -> RowUpdates {
         for mut update in updates.updates.iter_mut() {
@@ -64,7 +64,7 @@ impl<S: State> Updater for Count<S> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::nodes::state::MemStore;
+    use crate::operations::state::MemStore;
 
     #[test]
     fn counts_literals() {

@@ -1,7 +1,7 @@
-use crate::nodes::data::DataType;
+use super::data::DataType;
 use std::collections::HashMap;
 
-/// State handles stateful interactions for nodes
+/// State handles stateful interactions for operations
 pub trait State {
     fn get(&self, key: &Key) -> Vec<DataType>;
 
@@ -12,12 +12,14 @@ pub type Key = Vec<DataType>;
 
 /// MemStore implements state with an in mem hashmap.
 pub struct MemStore {
-    data: HashMap<Key, Vec<DataType>>
+    data: HashMap<Key, Vec<DataType>>,
 }
 
 impl MemStore {
     pub(crate) fn new() -> Self {
-        Self { data: HashMap::new() }
+        Self {
+            data: HashMap::new(),
+        }
     }
 }
 

@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 ordered-float = "2.5.0"
+petgraph = "0.5.1"
