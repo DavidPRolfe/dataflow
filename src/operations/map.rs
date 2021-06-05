@@ -1,14 +1,14 @@
-use super::data::{DataType, RowUpdate, RowUpdates, Source};
+use super::data::{DataType, RowUpdate, Updates, Source};
 use super::Operation;
 
 /// Map will alter all incoming rows to match the sources. This may reorder columns, add new
 /// copies of columns, or add new columns of literals
 pub struct Map {
-    sources: Vec<Source>,
+    pub sources: Vec<Source>,
 }
 
 impl Operation for Map {
-    fn process(&mut self, updates: RowUpdates) -> RowUpdates {
+    fn process(&mut self, updates: Updates) -> Vec<RowUpdate> {
         updates
             .updates
             .iter()
@@ -28,7 +28,6 @@ impl Operation for Map {
                     RowUpdate::Remove(_) => RowUpdate::Remove(mapped_row),
                 }
             })
-            .collect::<Vec<RowUpdate>>()
-            .into()
+            .collect()
     }
 }

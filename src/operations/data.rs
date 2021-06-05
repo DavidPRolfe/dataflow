@@ -133,17 +133,13 @@ where
     }
 }
 
-/// RowUpdates are a vec in case we need to send both an add and remove (say in case of a base row
+/// Updates store RowUpdates in a vec in case we need to send both an add and remove (say in case of a base row
 /// being updated).
 #[derive(Debug)]
-pub struct RowUpdates {
+pub struct Updates {
     pub updates: Vec<RowUpdate>,
-}
-
-impl From<Vec<RowUpdate>> for RowUpdates {
-    fn from(u: Vec<RowUpdate>) -> Self {
-        Self { updates: u }
-    }
+    pub source: usize,
+    pub destination: usize,
 }
 
 pub type Column = usize;

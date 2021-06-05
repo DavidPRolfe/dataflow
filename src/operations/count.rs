@@ -1,4 +1,4 @@
-use super::data::{DataType, RowUpdate, RowUpdates, Source};
+use super::data::{DataType, RowUpdate, Updates, Source};
 use super::state::State;
 use super::Operation;
 
@@ -8,9 +8,9 @@ use super::Operation;
 /// Note this doesn't directly support Count(*) from SQL. Instead this must be translated
 /// to Count(1) before it gets to this node.
 pub struct Count<S: State> {
-    source: Source,
-    group: Vec<usize>,
-    state: S,
+    pub source: Source,
+    pub group: Vec<usize>,
+    pub state: S,
 }
 
 impl<S: State> Count<S> {
@@ -34,7 +34,7 @@ impl<S: State> Count<S> {
 
 impl<S: State> Operation for Count<S> {
     // TODO: Group updates and don't send out update if addition/removal cancel out
-    fn process(&mut self, mut updates: RowUpdates) -> RowUpdates {
+    fn process(&mut self, mut updates: Updates) -> Vec<RowUpdate> {
         for mut update in updates.updates.iter_mut() {
             let mut group = vec![];
             for column in &self.group {
@@ -57,7 +57,7 @@ impl<S: State> Operation for Count<S> {
             self.set_count(group, cur + source_change);
             r.data.push(DataType::Integer(cur + source_change));
         }
-        updates
+        updates.updates
     }
 }
 

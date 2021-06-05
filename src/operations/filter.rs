@@ -1,23 +1,24 @@
-use super::data::{Column, Comparison, DataType, RowUpdates};
+use super::data::{Column, Comparison, DataType, Updates};
 use super::Operation;
+use crate::operations::data::RowUpdate;
 
 /// Filter will remove all rows that don't meet all of the constraint
 pub struct Filter {
-    constraints: Vec<ColumnConstraint>,
+    pub constraints: Vec<ColumnConstraint>,
 }
 
-struct ColumnConstraint {
-    column: Column,
-    constraint: Constraint,
+pub struct ColumnConstraint {
+    pub column: Column,
+    pub constraint: Constraint,
 }
 
-enum Constraint {
+pub enum Constraint {
     Comparison(Comparison, DataType),
     In(Vec<DataType>),
 }
 
 impl Operation for Filter {
-    fn process(&mut self, mut updates: RowUpdates) -> RowUpdates {
+    fn process(&mut self, mut updates: Updates) -> Vec<RowUpdate> {
         updates.updates.retain(|update| {
             self.constraints
                 .iter()
@@ -29,7 +30,7 @@ impl Operation for Filter {
                 })
         });
 
-        return updates;
+        return updates.updates;
     }
 }
 

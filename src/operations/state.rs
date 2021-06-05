@@ -16,7 +16,7 @@ pub struct MemStore {
 }
 
 impl MemStore {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             data: HashMap::new(),
         }
