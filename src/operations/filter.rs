@@ -24,7 +24,7 @@ impl Operation for Filter {
                 .iter()
                 .all(|constraint| !match &constraint.constraint {
                     Constraint::Comparison(op, value) => {
-                        op.compare(&update[constraint.column], &value)
+                        !op.compare(&update[constraint.column], &value)
                     }
                     Constraint::In(values) => values.contains(&update[constraint.column]),
                 })
@@ -38,13 +38,14 @@ impl Operation for Filter {
 mod tests {
     use super::*;
     use crate::operations::data::RowUpdate;
+    use crate::processing::Message::Update;
 
     #[test]
     fn filters_nothing() {
         let mut filter = Filter {
             constraints: vec![],
         };
-        assert_eq!(filter.process(vec![].into()).updates.len(), 0);
+        assert_eq!(filter.process(vec![].into()).len(), 0);
     }
 
     #[test]
@@ -70,9 +71,9 @@ mod tests {
         let mut filter = Filter { constraints };
 
         let filtered = filter.process(row_updates.into());
-        assert_eq!(filtered.updates.len(), 1);
-        assert_eq!(filtered.updates[0][0], 27.into());
-        assert_eq!(filtered.updates[0][1], "not true or false".into());
-        assert_eq!(filtered.updates[0][2], 31.into());
+        assert_eq!(filtered.len(), 1);
+        assert_eq!(filtered[0][0], 32.into());
+        assert_eq!(filtered[0][1], "not true or false".into());
+        assert_eq!(filtered[0][2], 31.into());
     }
 }

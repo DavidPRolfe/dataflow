@@ -69,7 +69,7 @@ impl Comparison {
 }
 
 /// A single row of data
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Row {
     pub data: Vec<DataType>,
 }
@@ -101,7 +101,7 @@ where
 }
 
 /// Used to send how rows have changed
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum RowUpdate {
     Add(Row),
     Remove(Row),
@@ -152,6 +152,16 @@ pub enum Source {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    impl From<Vec<RowUpdate>> for Updates {
+        fn from(u: Vec<RowUpdate>) -> Self {
+            Self {
+                updates: u,
+                source: 0,
+                destination: 0
+            }
+        }
+    }
 
     #[test]
     fn equality_works() {

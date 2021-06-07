@@ -7,7 +7,7 @@ use crate::operations::data::RowUpdate;
 
 mod count;
 pub mod data;
-mod filter;
+pub mod filter;
 mod map;
 pub mod state;
 

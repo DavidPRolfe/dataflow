@@ -1,4 +1,4 @@
-use super::data::{DataType, RowUpdate, Updates, Source};
+use super::data::{DataType, RowUpdate, Source, Updates};
 use super::Operation;
 
 /// Map will alter all incoming rows to match the sources. This may reorder columns, add new

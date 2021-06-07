@@ -1,4 +1,4 @@
-use super::data::{DataType, RowUpdate, Updates, Source};
+use super::data::{DataType, RowUpdate, Source, Updates};
 use super::state::State;
 use super::Operation;
 
@@ -80,10 +80,10 @@ mod test {
         ];
 
         let processed = node.process(updates.into());
-        assert_eq!(processed.updates.len(), 3);
-        assert_eq!(processed.updates[0][3], 1.into());
-        assert_eq!(processed.updates[1][3], 2.into());
-        assert_eq!(processed.updates[2][3], 1.into());
+        assert_eq!(processed.len(), 3);
+        assert_eq!(processed[0][3], 1.into());
+        assert_eq!(processed[1][3], 2.into());
+        assert_eq!(processed[2][3], 1.into());
 
         // Checking it works with non-1 literal
         let mut node = Count {
@@ -99,10 +99,10 @@ mod test {
         ];
 
         let processed = node.process(updates.into());
-        assert_eq!(processed.updates.len(), 3);
-        assert_eq!(processed.updates[0][3], 1.into());
-        assert_eq!(processed.updates[1][3], 2.into());
-        assert_eq!(processed.updates[2][3], 1.into());
+        assert_eq!(processed.len(), 3);
+        assert_eq!(processed[0][3], 1.into());
+        assert_eq!(processed[1][3], 2.into());
+        assert_eq!(processed[2][3], 1.into());
     }
 
     #[test]
@@ -119,10 +119,10 @@ mod test {
         ];
 
         let processed = node.process(updates.into());
-        assert_eq!(processed.updates.len(), 3);
-        assert_eq!(processed.updates[0][3], 0.into());
-        assert_eq!(processed.updates[1][3], 0.into());
-        assert_eq!(processed.updates[2][3], 0.into());
+        assert_eq!(processed.len(), 3);
+        assert_eq!(processed[0][3], 0.into());
+        assert_eq!(processed[1][3], 0.into());
+        assert_eq!(processed[2][3], 0.into());
     }
 
     #[test]
@@ -139,10 +139,10 @@ mod test {
         ];
 
         let processed = node.process(updates.into());
-        assert_eq!(processed.updates.len(), 3);
-        assert_eq!(processed.updates[0][3], 1.into());
-        assert_eq!(processed.updates[1][3], 2.into());
-        assert_eq!(processed.updates[2][3], 1.into());
+        assert_eq!(processed.len(), 3);
+        assert_eq!(processed[0][3], 1.into());
+        assert_eq!(processed[1][3], 2.into());
+        assert_eq!(processed[2][3], 1.into());
 
         let mut node = Count {
             source: Source::Column(2),
@@ -157,10 +157,10 @@ mod test {
         ];
 
         let processed = node.process(updates.into());
-        assert_eq!(processed.updates.len(), 3);
-        assert_eq!(processed.updates[0][3], 0.into());
-        assert_eq!(processed.updates[1][3], 0.into());
-        assert_eq!(processed.updates[2][3], 0.into());
+        assert_eq!(processed.len(), 3);
+        assert_eq!(processed[0][3], 0.into());
+        assert_eq!(processed[1][3], 0.into());
+        assert_eq!(processed[2][3], 0.into());
     }
 
     #[test]
@@ -177,10 +177,10 @@ mod test {
         ];
 
         let processed = node.process(updates.into());
-        assert_eq!(processed.updates.len(), 3);
-        assert_eq!(processed.updates[0][3], 1.into());
-        assert_eq!(processed.updates[1][3], 1.into());
-        assert_eq!(processed.updates[2][3], 0.into());
+        assert_eq!(processed.len(), 3);
+        assert_eq!(processed[0][3], 1.into());
+        assert_eq!(processed[1][3], 1.into());
+        assert_eq!(processed[2][3], 0.into());
 
         let mut node = Count {
             source: Source::Column(2),
@@ -195,9 +195,9 @@ mod test {
         ];
 
         let processed = node.process(updates.into());
-        assert_eq!(processed.updates.len(), 3);
-        assert_eq!(processed.updates[0][3], 0.into());
-        assert_eq!(processed.updates[1][3], 0.into());
-        assert_eq!(processed.updates[2][3], 0.into());
+        assert_eq!(processed.len(), 3);
+        assert_eq!(processed[0][3], 0.into());
+        assert_eq!(processed[1][3], 0.into());
+        assert_eq!(processed[2][3], 0.into());
     }
 }
